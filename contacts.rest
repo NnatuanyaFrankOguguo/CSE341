@@ -1,0 +1,105 @@
+### Contacts API Testing
+
+# Set your base URL (change this to your deployed URL when testing on Render)
+@baseUrl = http://localhost:3000
+
+### Get API Info
+GET {{baseUrl}}/
+
+### Get all contacts
+GET {{baseUrl}}/contacts
+
+### Get specific contact by ID
+# Replace with actual contact ID from your database
+GET {{baseUrl}}/contacts/60f1b2b3b3b3b3b3b3b3b3b3
+
+### Create a new contact
+POST {{baseUrl}}/contacts
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "favoriteColor": "Blue",
+  "birthday": "1990-05-15"
+}
+
+### Create another contact
+POST {{baseUrl}}/contacts
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Smith", 
+  "email": "jane.smith@example.com",
+  "favoriteColor": "Green",
+  "birthday": "1985-08-22"
+}
+
+### Create contact with minimal data (only required fields)
+POST {{baseUrl}}/contacts
+Content-Type: application/json
+
+{
+  "firstName": "Mike",
+  "lastName": "Johnson",
+  "email": "mike.johnson@example.com"
+}
+
+### Update a contact (replace with actual contact ID)
+PUT {{baseUrl}}/contacts/60f1b2b3b3b3b3b3b3b3b3b3
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe.updated@example.com",
+  "favoriteColor": "Red",
+  "birthday": "1990-05-15"
+}
+
+### Update contact partially (replace with actual contact ID)
+PUT {{baseUrl}}/contacts/60f1b2b3b3b3b3b3b3b3b3b3
+Content-Type: application/json
+
+{
+  "favoriteColor": "Purple"
+}
+
+### Delete a contact (replace with actual contact ID)
+DELETE {{baseUrl}}/contacts/60f1b2b3b3b3b3b3b3b3b3b3
+
+### Test Error Cases
+
+### Try to get non-existent contact
+GET {{baseUrl}}/contacts/60f1b2b3b3b3b3b3b3b3b3b9
+
+### Try to create contact without required fields
+POST {{baseUrl}}/contacts
+Content-Type: application/json
+
+{
+  "firstName": "Test"
+}
+
+### Try to create contact with invalid email
+POST {{baseUrl}}/contacts
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "invalid-email"
+}
+
+### Try to update non-existent contact
+PUT {{baseUrl}}/contacts/60f1b2b3b3b3b3b3b3b3b3b9
+Content-Type: application/json
+
+{
+  "firstName": "Updated"
+}
+
+### Try to delete non-existent contact
+DELETE {{baseUrl}}/contacts/60f1b2b3b3b3b3b3b3b3b3b9
