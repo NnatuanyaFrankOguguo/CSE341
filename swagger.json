@@ -1,0 +1,385 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Contacts API",
+    "description": "A REST API for managing contacts with MongoDB. This API allows you to create, read, update, and delete contact information including names, emails, favorite colors, and birthdays."
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "definitions": {
+    "Contact": {
+      "type": "object",
+      "required": ["firstName", "lastName", "email"],
+      "properties": {
+        "_id": {
+          "type": "string",
+          "description": "Unique identifier for the contact",
+          "example": "60f1b2b3b3b3b3b3b3b3b3b3"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "Contact's first name",
+          "example": "John"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Contact's last name",
+          "example": "Doe"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Contact's email address (must be unique)",
+          "example": "john.doe@example.com"
+        },
+        "favoriteColor": {
+          "type": "string",
+          "description": "Contact's favorite color",
+          "example": "Blue"
+        },
+        "birthday": {
+          "type": "string",
+          "description": "Contact's birthday in YYYY-MM-DD format",
+          "example": "1990-05-15"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when contact was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when contact was last updated"
+        }
+      }
+    },
+    "ContactInput": {
+      "type": "object",
+      "required": ["firstName", "lastName", "email"],
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "description": "Contact's first name",
+          "example": "John"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Contact's last name",
+          "example": "Doe"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Contact's email address (must be unique)",
+          "example": "john.doe@example.com"
+        },
+        "favoriteColor": {
+          "type": "string",
+          "description": "Contact's favorite color",
+          "example": "Blue"
+        },
+        "birthday": {
+          "type": "string",
+          "description": "Contact's birthday in YYYY-MM-DD format",
+          "example": "1990-05-15"
+        }
+      }
+    },
+    "ContactUpdate": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "description": "Contact's first name",
+          "example": "John"
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Contact's last name",
+          "example": "Doe"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Contact's email address (must be unique)",
+          "example": "john.doe@example.com"
+        },
+        "favoriteColor": {
+          "type": "string",
+          "description": "Contact's favorite color",
+          "example": "Blue"
+        },
+        "birthday": {
+          "type": "string",
+          "description": "Contact's birthday in YYYY-MM-DD format",
+          "example": "1990-05-15"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "description": "Error message",
+          "example": "Contact not found"
+        }
+      }
+    },
+    "ApiInfo": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Contacts API is running!"
+        },
+        "version": {
+          "type": "string",
+          "example": "1.0.0"
+        },
+        "endpoints": {
+          "type": "object",
+          "properties": {
+            "GET /contacts": {
+              "type": "string",
+              "example": "Get all contacts"
+            },
+            "GET /contacts/:id": {
+              "type": "string",
+              "example": "Get contact by ID"
+            },
+            "POST /contacts": {
+              "type": "string",
+              "example": "Create new contact"
+            },
+            "PUT /contacts/:id": {
+              "type": "string",
+              "example": "Update contact by ID"
+            },
+            "DELETE /contacts/:id": {
+              "type": "string",
+              "example": "Delete contact by ID"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["API Info"],
+        "summary": "Get API information",
+        "description": "Returns basic information about the API and available endpoints",
+        "responses": {
+          "200": {
+            "description": "API information retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/ApiInfo"
+            }
+          }
+        }
+      }
+    },
+    "/contacts": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "Get all contacts",
+        "description": "Retrieve a list of all contacts in the database",
+        "responses": {
+          "200": {
+            "description": "List of contacts retrieved successfully",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Contact"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Create a new contact",
+        "description": "Create a new contact with the provided information. firstName, lastName, and email are required fields.",
+        "parameters": [
+          {
+            "name": "contact",
+            "in": "body",
+            "description": "Contact information",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ContactInput"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Contact created successfully",
+            "schema": {
+              "$ref": "#/definitions/Contact"
+            }
+          },
+          "400": {
+            "description": "Bad request - validation error or email already exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/contacts/{id}": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "Get contact by ID",
+        "description": "Retrieve a specific contact by their unique ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Contact ID (MongoDB ObjectId)",
+            "required": true,
+            "type": "string",
+            "example": "60f1b2b3b3b3b3b3b3b3b3b3"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/Contact"
+            }
+          },
+          "404": {
+            "description": "Contact not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Contacts"],
+        "summary": "Update contact by ID",
+        "description": "Update an existing contact with new information. All fields are optional for updates.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Contact ID (MongoDB ObjectId)",
+            "required": true,
+            "type": "string",
+            "example": "60f1b2b3b3b3b3b3b3b3b3b3"
+          },
+          {
+            "name": "contact",
+            "in": "body",
+            "description": "Updated contact information",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ContactUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact updated successfully",
+            "schema": {
+              "$ref": "#/definitions/Contact"
+            }
+          },
+          "400": {
+            "description": "Bad request - validation error or email already exists",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Contact not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Contacts"],
+        "summary": "Delete contact by ID",
+        "description": "Delete a specific contact from the database",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Contact ID (MongoDB ObjectId)",
+            "required": true,
+            "type": "string",
+            "example": "60f1b2b3b3b3b3b3b3b3b3b3"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Contact deleted successfully"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contact not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}
