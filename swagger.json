@@ -5,7 +5,7 @@
     "title": "Contacts API",
     "description": "A REST API for managing contacts with MongoDB. This API allows you to create, read, update, and delete contact information including names, emails, favorite colors, and birthdays."
   },
-  "host": "localhost:3000",
+  "host": "https://cse341-38uv.onrender.com",
   "basePath": "/",
   "schemes": [
     "http",
