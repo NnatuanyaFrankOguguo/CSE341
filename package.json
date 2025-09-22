@@ -1,26 +1,35 @@
 {
-  "name": "contacts-api",
+  "name": "digital-library-management-api",
   "version": "1.0.0",
-  "description": "API for managing contacts with MongoDB",
+  "description": "A comprehensive digital library management system API with books and authors collections, featuring full CRUD operations, validation, and modern security practices",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "seed": "node seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "api",
-    "contacts",
+    "library",
+    "books",
+    "authors",
     "mongodb",
-    "express"
+    "express",
+    "crud",
+    "rest-api",
+    "digital-library",
+    "library-management"
   ],
-  "author": "",
+  "author": "CSE341 Student",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^7.2.0",
     "mongodb": "^6.3.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"

@@ -2,11 +2,19 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "Contacts API",
-    "description": "A REST API for managing contacts with MongoDB. This API allows you to create, read, update, and delete contact information including names, emails, favorite colors, and birthdays."
+    "title": "Digital Library Management API",
+    "description": "A comprehensive REST API for managing a digital library system with books and authors. This API provides full CRUD operations, advanced filtering, book borrowing/returning functionality, and robust validation. Perfect for libraries, bookstores, or personal book collection management.",
+    "contact": {
+      "name": "API Support",
+      "email": "support@library-api.com"
+    },
+    "license": {
+      "name": "ISC",
+      "url": "https://opensource.org/licenses/ISC"
+    }
   },
   "host": "localhost:3000",
-  "basePath": "/",
+  "basePath": "/api",
   "schemes": [
     "http",
     "https"
@@ -17,195 +25,345 @@
   "produces": [
     "application/json"
   ],
+  "tags": [
+    {
+      "name": "Books",
+      "description": "Operations related to book management"
+    },
+    {
+      "name": "Authors",
+      "description": "Operations related to author management"
+    },
+    {
+      "name": "Library",
+      "description": "Library-specific operations like borrowing and returning books"
+    }
+  ],
   "definitions": {
-    "Contact": {
+    "Book": {
       "type": "object",
-      "required": ["firstName", "lastName", "email"],
+      "required": ["title", "authorId", "isbn", "genre", "publishedDate", "description", "totalPages"],
       "properties": {
         "_id": {
           "type": "string",
-          "description": "Unique identifier for the contact",
+          "description": "Unique identifier for the book",
           "example": "60f1b2b3b3b3b3b3b3b3b3b3"
         },
-        "firstName": {
+        "title": {
           "type": "string",
-          "description": "Contact's first name",
-          "example": "John"
+          "description": "Book title",
+          "example": "The Great Gatsby"
         },
-        "lastName": {
+        "authorId": {
           "type": "string",
-          "description": "Contact's last name",
-          "example": "Doe"
+          "description": "Reference to the author's ID",
+          "example": "60f1b2b3b3b3b3b3b3b3b3b4"
         },
-        "email": {
+        "isbn": {
           "type": "string",
-          "format": "email",
-          "description": "Contact's email address (must be unique)",
-          "example": "john.doe@example.com"
+          "description": "International Standard Book Number (10 or 13 digits)",
+          "example": "9780743273565"
         },
-        "favoriteColor": {
+        "genre": {
           "type": "string",
-          "description": "Contact's favorite color",
-          "example": "Blue"
+          "description": "Book genre or category",
+          "example": "Classic Literature"
         },
-        "birthday": {
+        "publishedDate": {
           "type": "string",
-          "description": "Contact's birthday in YYYY-MM-DD format",
-          "example": "1990-05-15"
+          "format": "date",
+          "description": "Publication date (YYYY-MM-DD)",
+          "example": "1925-04-10"
+        },
+        "description": {
+          "type": "string",
+          "description": "Book description or summary",
+          "example": "A classic American novel set in the Jazz Age that explores themes of wealth, love, and the American Dream."
+        },
+        "totalPages": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "description": "Total number of pages",
+          "example": 180
+        },
+        "availability": {
+          "type": "boolean",
+          "description": "Whether the book is available for borrowing",
+          "example": true
+        },
+        "rating": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Book rating (0-5)",
+          "example": 4.5
+        },
+        "borrowedBy": {
+          "type": "string",
+          "description": "Name of the current borrower (null if available)",
+          "example": "John Smith"
+        },
+        "borrowedDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date when the book was borrowed",
+          "example": "2024-09-15T10:30:00.000Z"
+        },
+        "returnDueDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Due date for returning the book",
+          "example": "2024-09-29T10:30:00.000Z"
         },
         "createdAt": {
           "type": "string",
           "format": "date-time",
-          "description": "Timestamp when contact was created"
+          "description": "Record creation timestamp",
+          "example": "2024-09-01T12:00:00.000Z"
         },
         "updatedAt": {
           "type": "string",
           "format": "date-time",
-          "description": "Timestamp when contact was last updated"
+          "description": "Record last update timestamp",
+          "example": "2024-09-01T12:00:00.000Z"
         }
       }
     },
-    "ContactInput": {
+    "Author": {
       "type": "object",
-      "required": ["firstName", "lastName", "email"],
+      "required": ["name", "bio", "birthDate", "nationality"],
       "properties": {
-        "firstName": {
+        "_id": {
           "type": "string",
-          "description": "Contact's first name",
-          "example": "John"
+          "description": "Unique identifier for the author",
+          "example": "60f1b2b3b3b3b3b3b3b3b3b4"
         },
-        "lastName": {
+        "name": {
           "type": "string",
-          "description": "Contact's last name",
-          "example": "Doe"
+          "description": "Author's full name",
+          "example": "F. Scott Fitzgerald"
+        },
+        "bio": {
+          "type": "string",
+          "description": "Author's biography",
+          "example": "American novelist and short story writer, widely regarded as one of the greatest American writers of the 20th century."
+        },
+        "birthDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Author's birth date (YYYY-MM-DD)",
+          "example": "1896-09-24"
+        },
+        "nationality": {
+          "type": "string",
+          "description": "Author's nationality",
+          "example": "American"
         },
         "email": {
           "type": "string",
           "format": "email",
-          "description": "Contact's email address (must be unique)",
-          "example": "john.doe@example.com"
+          "description": "Author's email address",
+          "example": "f.fitzgerald@literature.com"
         },
-        "favoriteColor": {
+        "website": {
           "type": "string",
-          "description": "Contact's favorite color",
-          "example": "Blue"
+          "format": "uri",
+          "description": "Author's official website",
+          "example": "https://www.fscottfitzgerald.com"
         },
-        "birthday": {
+        "socialMedia": {
+          "type": "object",
+          "properties": {
+            "twitter": {
+              "type": "string",
+              "description": "Twitter handle",
+              "example": "@fscottfitzgerald"
+            },
+            "instagram": {
+              "type": "string",
+              "description": "Instagram handle",
+              "example": "@fscottfitzgerald"
+            },
+            "facebook": {
+              "type": "string",
+              "description": "Facebook page",
+              "example": "FScottFitzgeraldOfficial"
+            },
+            "linkedin": {
+              "type": "string",
+              "description": "LinkedIn profile",
+              "example": "fscottfitzgerald"
+            }
+          }
+        },
+        "awards": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of awards received",
+          "example": ["Pulitzer Prize", "National Book Award"]
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether the author is currently active",
+          "example": true
+        },
+        "bookCount": {
+          "type": "integer",
+          "description": "Number of books by this author in the system",
+          "example": 5
+        },
+        "books": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Book"
+          },
+          "description": "List of books by this author"
+        },
+        "createdAt": {
           "type": "string",
-          "description": "Contact's birthday in YYYY-MM-DD format",
-          "example": "1990-05-15"
+          "format": "date-time",
+          "description": "Record creation timestamp",
+          "example": "2024-09-01T12:00:00.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Record last update timestamp",
+          "example": "2024-09-01T12:00:00.000Z"
         }
       }
     },
-    "ContactUpdate": {
+    "ApiResponse": {
       "type": "object",
       "properties": {
-        "firstName": {
-          "type": "string",
-          "description": "Contact's first name",
-          "example": "John"
+        "success": {
+          "type": "boolean",
+          "description": "Indicates if the request was successful",
+          "example": true
         },
-        "lastName": {
-          "type": "string",
-          "description": "Contact's last name",
-          "example": "Doe"
+        "data": {
+          "type": "object",
+          "description": "Response data"
         },
-        "email": {
+        "message": {
           "type": "string",
-          "format": "email",
-          "description": "Contact's email address (must be unique)",
-          "example": "john.doe@example.com"
+          "description": "Response message",
+          "example": "Operation completed successfully"
         },
-        "favoriteColor": {
-          "type": "string",
-          "description": "Contact's favorite color",
-          "example": "Blue"
-        },
-        "birthday": {
-          "type": "string",
-          "description": "Contact's birthday in YYYY-MM-DD format",
-          "example": "1990-05-15"
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "example": 1
+            },
+            "limit": {
+              "type": "integer",
+              "example": 10
+            },
+            "total": {
+              "type": "integer",
+              "example": 25
+            }
+          }
         }
       }
     },
     "Error": {
       "type": "object",
       "properties": {
+        "success": {
+          "type": "boolean",
+          "example": false
+        },
         "error": {
           "type": "string",
-          "description": "Error message",
-          "example": "Contact not found"
-        }
-      }
-    },
-    "ApiInfo": {
-      "type": "object",
-      "properties": {
+          "description": "Error type",
+          "example": "Validation error"
+        },
         "message": {
           "type": "string",
-          "example": "Contacts API is running!"
+          "description": "Detailed error message",
+          "example": "Title is required"
         },
-        "version": {
+        "timestamp": {
           "type": "string",
-          "example": "1.0.0"
-        },
-        "endpoints": {
-          "type": "object",
-          "properties": {
-            "GET /contacts": {
-              "type": "string",
-              "example": "Get all contacts"
-            },
-            "GET /contacts/:id": {
-              "type": "string",
-              "example": "Get contact by ID"
-            },
-            "POST /contacts": {
-              "type": "string",
-              "example": "Create new contact"
-            },
-            "PUT /contacts/:id": {
-              "type": "string",
-              "example": "Update contact by ID"
-            },
-            "DELETE /contacts/:id": {
-              "type": "string",
-              "example": "Delete contact by ID"
-            }
-          }
+          "format": "date-time",
+          "description": "Error timestamp",
+          "example": "2024-09-22T10:30:00.000Z"
         }
       }
     }
   },
   "paths": {
-    "/": {
+    "/books": {
       "get": {
-        "tags": ["API Info"],
-        "summary": "Get API information",
-        "description": "Returns basic information about the API and available endpoints",
-        "responses": {
-          "200": {
-            "description": "API information retrieved successfully",
-            "schema": {
-              "$ref": "#/definitions/ApiInfo"
-            }
+        "tags": ["Books"],
+        "summary": "Get all books",
+        "description": "Retrieve all books with optional filtering, sorting, and pagination",
+        "parameters": [
+          {
+            "name": "genre",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by genre",
+            "example": "Fantasy"
+          },
+          {
+            "name": "authorId",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by author ID",
+            "example": "60f1b2b3b3b3b3b3b3b3b3b4"
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "type": "boolean",
+            "description": "Filter by availability",
+            "example": true
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "type": "string",
+            "description": "Sort field",
+            "example": "title"
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "description": "Sort order",
+            "example": "asc"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "description": "Page number",
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Items per page",
+            "example": 10
           }
-        }
-      }
-    },
-    "/contacts": {
-      "get": {
-        "tags": ["Contacts"],
-        "summary": "Get all contacts",
-        "description": "Retrieve a list of all contacts in the database",
+        ],
         "responses": {
           "200": {
-            "description": "List of contacts retrieved successfully",
+            "description": "Successfully retrieved books",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Contact"
-              }
+              "$ref": "#/definitions/ApiResponse"
             }
           },
           "500": {
@@ -217,35 +375,69 @@
         }
       },
       "post": {
-        "tags": ["Contacts"],
-        "summary": "Create a new contact",
-        "description": "Create a new contact with the provided information. firstName, lastName, and email are required fields.",
+        "tags": ["Books"],
+        "summary": "Create a new book",
+        "description": "Add a new book to the library",
         "parameters": [
           {
-            "name": "contact",
+            "name": "book",
             "in": "body",
-            "description": "Contact information",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ContactInput"
+              "type": "object",
+              "required": ["title", "authorId", "isbn", "genre", "publishedDate", "description", "totalPages"],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "The Hobbit"
+                },
+                "authorId": {
+                  "type": "string",
+                  "example": "60f1b2b3b3b3b3b3b3b3b3b4"
+                },
+                "isbn": {
+                  "type": "string",
+                  "example": "9780547928227"
+                },
+                "genre": {
+                  "type": "string",
+                  "example": "Fantasy"
+                },
+                "publishedDate": {
+                  "type": "string",
+                  "example": "1937-09-21"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "A fantasy novel about a hobbit's unexpected journey."
+                },
+                "totalPages": {
+                  "type": "integer",
+                  "example": 304
+                },
+                "rating": {
+                  "type": "number",
+                  "example": 4.8
+                }
+              }
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Contact created successfully",
+            "description": "Book created successfully",
             "schema": {
-              "$ref": "#/definitions/Contact"
+              "$ref": "#/definitions/ApiResponse"
             }
           },
           "400": {
-            "description": "Bad request - validation error or email already exists",
+            "description": "Validation error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Internal server error",
+          "404": {
+            "description": "Author not found",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -253,36 +445,30 @@
         }
       }
     },
-    "/contacts/{id}": {
+    "/books/{id}": {
       "get": {
-        "tags": ["Contacts"],
-        "summary": "Get contact by ID",
-        "description": "Retrieve a specific contact by their unique ID",
+        "tags": ["Books"],
+        "summary": "Get book by ID",
+        "description": "Retrieve a specific book with author details",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "Contact ID (MongoDB ObjectId)",
             "required": true,
             "type": "string",
+            "description": "Book ID",
             "example": "60f1b2b3b3b3b3b3b3b3b3b3"
           }
         ],
         "responses": {
           "200": {
-            "description": "Contact retrieved successfully",
+            "description": "Book found",
             "schema": {
-              "$ref": "#/definitions/Contact"
+              "$ref": "#/definitions/ApiResponse"
             }
           },
           "404": {
-            "description": "Contact not found",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "500": {
-            "description": "Internal server error",
+            "description": "Book not found",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -290,45 +476,242 @@
         }
       },
       "put": {
-        "tags": ["Contacts"],
-        "summary": "Update contact by ID",
-        "description": "Update an existing contact with new information. All fields are optional for updates.",
+        "tags": ["Books"],
+        "summary": "Update book by ID",
+        "description": "Update an existing book's information",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "Contact ID (MongoDB ObjectId)",
             "required": true,
             "type": "string",
-            "example": "60f1b2b3b3b3b3b3b3b3b3b3"
+            "description": "Book ID"
           },
           {
-            "name": "contact",
+            "name": "book",
             "in": "body",
-            "description": "Updated contact information",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/ContactUpdate"
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "The Hobbit: Updated Edition"
+                },
+                "genre": {
+                  "type": "string",
+                  "example": "Epic Fantasy"
+                },
+                "rating": {
+                  "type": "number",
+                  "example": 4.9
+                }
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Contact updated successfully",
+            "description": "Book updated successfully",
             "schema": {
-              "$ref": "#/definitions/Contact"
+              "$ref": "#/definitions/ApiResponse"
             }
           },
           "400": {
-            "description": "Bad request - validation error or email already exists",
+            "description": "Validation error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
           "404": {
-            "description": "Contact not found",
+            "description": "Book not found",
             "schema": {
               "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Books"],
+        "summary": "Delete book by ID",
+        "description": "Remove a book from the library (only if not currently borrowed)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Book ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Cannot delete borrowed book",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Book not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/books/{id}/borrow": {
+      "post": {
+        "tags": ["Library"],
+        "summary": "Borrow a book",
+        "description": "Mark a book as borrowed by a specific person",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Book ID"
+          },
+          {
+            "name": "borrowInfo",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["borrowerInfo"],
+              "properties": {
+                "borrowerInfo": {
+                  "type": "string",
+                  "example": "John Smith",
+                  "description": "Name or ID of the borrower"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book borrowed successfully",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Book not available or validation error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Book not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/books/{id}/return": {
+      "post": {
+        "tags": ["Library"],
+        "summary": "Return a book",
+        "description": "Mark a borrowed book as returned and available",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Book ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book returned successfully",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Book not currently borrowed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Book not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/authors": {
+      "get": {
+        "tags": ["Authors"],
+        "summary": "Get all authors",
+        "description": "Retrieve all authors with optional filtering, sorting, and pagination",
+        "parameters": [
+          {
+            "name": "nationality",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by nationality",
+            "example": "American"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "type": "string",
+            "description": "Search by name",
+            "example": "Stephen"
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "type": "string",
+            "description": "Sort field",
+            "example": "name"
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "description": "Sort order",
+            "example": "asc"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "description": "Page number",
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Items per page",
+            "example": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved authors",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
             }
           },
           "500": {
@@ -339,41 +722,244 @@
           }
         }
       },
-      "delete": {
-        "tags": ["Contacts"],
-        "summary": "Delete contact by ID",
-        "description": "Delete a specific contact from the database",
+      "post": {
+        "tags": ["Authors"],
+        "summary": "Create a new author",
+        "description": "Add a new author to the system",
+        "parameters": [
+          {
+            "name": "author",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["name", "bio", "birthDate", "nationality"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Neil Gaiman"
+                },
+                "bio": {
+                  "type": "string",
+                  "example": "English author of short fiction, novels, comic books, graphic novels, audio theatre, and films."
+                },
+                "birthDate": {
+                  "type": "string",
+                  "example": "1960-11-10"
+                },
+                "nationality": {
+                  "type": "string",
+                  "example": "British"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "neil@neilgaiman.com"
+                },
+                "website": {
+                  "type": "string",
+                  "example": "https://www.neilgaiman.com"
+                },
+                "socialMedia": {
+                  "type": "object",
+                  "properties": {
+                    "twitter": {
+                      "type": "string",
+                      "example": "@neilhimself"
+                    },
+                    "instagram": {
+                      "type": "string",
+                      "example": "@neilhimself"
+                    }
+                  }
+                },
+                "awards": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": ["Hugo Award", "Nebula Award"]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Author created successfully",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/authors/{id}": {
+      "get": {
+        "tags": ["Authors"],
+        "summary": "Get author by ID",
+        "description": "Retrieve a specific author with their books",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "Contact ID (MongoDB ObjectId)",
             "required": true,
             "type": "string",
-            "example": "60f1b2b3b3b3b3b3b3b3b3b3"
+            "description": "Author ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "Contact deleted successfully",
+            "description": "Author found",
             "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Contact deleted successfully"
-                }
-              }
+              "$ref": "#/definitions/ApiResponse"
             }
           },
           "404": {
-            "description": "Contact not found",
+            "description": "Author not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Authors"],
+        "summary": "Update author by ID",
+        "description": "Update an existing author's information",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Author ID"
+          },
+          {
+            "name": "author",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "bio": {
+                  "type": "string",
+                  "example": "Updated biography with recent achievements."
+                },
+                "website": {
+                  "type": "string",
+                  "example": "https://www.updated-website.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Author updated successfully",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Validation error",
             "schema": {
               "$ref": "#/definitions/Error"
             }
           },
-          "500": {
-            "description": "Internal server error",
+          "404": {
+            "description": "Author not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Authors"],
+        "summary": "Delete author by ID",
+        "description": "Remove an author from the system (only if they have no books)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Author ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Author deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Cannot delete author with books",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Author not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/authors/{id}/awards": {
+      "post": {
+        "tags": ["Authors"],
+        "summary": "Add award to author",
+        "description": "Add a new award to an author's list of achievements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Author ID"
+          },
+          {
+            "name": "award",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["award"],
+              "properties": {
+                "award": {
+                  "type": "string",
+                  "example": "Pulitzer Prize for Fiction",
+                  "description": "Award name or description"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Award added successfully",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Author not found",
             "schema": {
               "$ref": "#/definitions/Error"
             }

@@ -1,198 +1,365 @@
-# Contacts API
+# 📚 Digital Library Management API
 
-A REST API for managing contacts built with Node.js, Express, and MongoDB.
+A comprehensive REST API for managing a digital library system built with modern Node.js, Express, and MongoDB. This system provides full CRUD operations for books and authors, advanced filtering, book borrowing/returning functionality, and professional-grade validation and security.
 
-## Features
+## 🌟 Features
 
-- **CRUD Operations**: Create, Read, Update, and Delete contacts
-- **MongoDB Integration**: Stores contact data in MongoDB
-- **Input Validation**: Validates required fields and email format
-- **Error Handling**: Comprehensive error handling and responses
-- **MVC Architecture**: Organized code structure with separation of concerns
+### Core Functionality
 
-## Contact Data Structure
+- **📖 Book Management**: Complete CRUD operations for books with 10+ fields
+- **👥 Author Management**: Full author lifecycle management with 8+ fields  
+- **🔄 Library Operations**: Book borrowing and returning system
+- **🔍 Advanced Filtering**: Search and filter books by genre, author, availability
+- **📄 Pagination**: Efficient data retrieval with pagination support
+- **⭐ Rating System**: Book rating and review capabilities
 
-Each contact contains:
-- `firstName` (required): Contact's first name
-- `lastName` (required): Contact's last name  
-- `email` (required): Contact's email address (must be unique)
-- `favoriteColor` (optional): Contact's favorite color
-- `birthday` (optional): Contact's birthday
+### Technical Excellence
 
-## Prerequisites
+- **🛡️ Security First**: Helmet.js, rate limiting, CORS protection
+- **✅ Robust Validation**: Comprehensive input validation and sanitization
+- **📝 Detailed Logging**: Request/response logging with performance tracking
+- **🚀 Modern Architecture**: Clean MVC pattern with separation of concerns
+- **📚 API Documentation**: Professional Swagger/OpenAPI documentation
+- **⚡ Performance Optimized**: MongoDB aggregation pipelines for efficiency
+
+## 📊 Data Models
+
+### 📖 Book Schema (10+ Fields)
+
+- `title` (required): Book title
+- `authorId` (required): Reference to author
+- `isbn` (required): International Standard Book Number
+- `genre` (required): Book category/genre
+- `publishedDate` (required): Publication date
+- `description` (required): Book summary
+- `totalPages` (required): Number of pages
+- `availability`: Current availability status
+- `rating`: User rating (0-5)
+- `borrowedBy`: Current borrower information
+- `borrowedDate`: Date when borrowed
+- `returnDueDate`: Due date for return
+- `createdAt`/`updatedAt`: Timestamps
+
+### 👤 Author Schema (8+ Fields)
+
+- `name` (required): Author's full name
+- `bio` (required): Author biography
+- `birthDate` (required): Birth date
+- `nationality` (required): Author's nationality
+- `email`: Contact email
+- `website`: Official website
+- `socialMedia`: Social media handles (Twitter, Instagram, Facebook, LinkedIn)
+- `awards`: Array of awards and achievements
+- `isActive`: Active status
+- `createdAt`/`updatedAt`: Timestamps
+
+## 🚀 Quick Start
+
+### Prerequisites
 
 - Node.js (v14 or higher)
-- MongoDB database (local or cloud)
+- MongoDB database (local or Atlas)
 - npm or yarn package manager
 
-## Installation
+### Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
+
    ```bash
-   git clone <repository-url>
-   cd contacts-api
+   git clone https://github.com/your-username/digital-library-api.git
+   cd digital-library-api
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
-3. Set up environment variables:
+3. **Set up environment variables:**
+
    ```bash
-   # Copy the example file
-   copy .env.example .env
-   
-   # Edit .env file with your MongoDB connection string
-   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/contacts-db
-   PORT=3000
+   cp .env.example .env
+   # Edit .env with your MongoDB connection string and other settings
    ```
 
-4. Import sample data (optional):
-   ```bash
-   npm run seed
-   ```
+4. **Start the server:**
 
-5. Start the server:
    ```bash
-   # Development mode with auto-restart
+   # Development mode with auto-reload
    npm run dev
    
    # Production mode
    npm start
    ```
 
-## API Endpoints
+5. **Seed the database (optional):**
 
-### Base URL
-- Local: `http://localhost:3000`
-- Production: Your deployed URL
+   ```bash
+   npm run seed
+   ```
 
-### Endpoints
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# MongoDB Connection
+MONGODB_URI=mongodb://localhost:27017/digital-library
+# or for MongoDB Atlas:
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/digital-library
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# Security (optional)
+JWT_SECRET=your-secret-key-here
+```
+
+## 📖 API Documentation
+
+### Base URLs
+
+- **Local Development**: `http://localhost:3000`
+- **Production**: Your deployed URL
+- **API Documentation**: `http://localhost:3000/api-docs`
+- **Health Check**: `http://localhost:3000/health`
+
+### API Endpoints
+
+#### 📚 Books API
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/` | API information |
-| GET | `/contacts` | Get all contacts |
-| GET | `/contacts/:id` | Get contact by ID |
-| POST | `/contacts` | Create new contact |
-| PUT | `/contacts/:id` | Update contact by ID |
-| DELETE | `/contacts/:id` | Delete contact by ID |
+| GET | `/api/books` | Get all books (with filtering & pagination) |
+| GET | `/api/books/:id` | Get book by ID with author details |
+| POST | `/api/books` | Create new book |
+| PUT | `/api/books/:id` | Update book by ID |
+| DELETE | `/api/books/:id` | Delete book by ID |
+| POST | `/api/books/:id/borrow` | Borrow a book |
+| POST | `/api/books/:id/return` | Return a book |
 
-### Example Requests
+#### 👥 Authors API
 
-#### Get All Contacts
-```http
-GET /contacts
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/authors` | Get all authors (with filtering & pagination) |
+| GET | `/api/authors/:id` | Get author by ID with their books |
+| POST | `/api/authors` | Create new author |
+| PUT | `/api/authors/:id` | Update author by ID |
+| DELETE | `/api/authors/:id` | Delete author by ID |
+| POST | `/api/authors/:id/awards` | Add award to author |
+
+### Example API Calls
+
+#### Create a New Author
+
+```bash
+curl -X POST http://localhost:3000/api/authors \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Neil Gaiman",
+    "bio": "English author of short fiction, novels, comic books, and graphic novels.",
+    "birthDate": "1960-11-10",
+    "nationality": "British",
+    "email": "neil@neilgaiman.com",
+    "website": "https://www.neilgaiman.com",
+    "socialMedia": {
+      "twitter": "@neilhimself",
+      "instagram": "@neilhimself"
+    },
+    "awards": ["Hugo Award", "Nebula Award"]
+  }'
 ```
 
-#### Get Contact by ID
-```http
-GET /contacts/60f1b2b3b3b3b3b3b3b3b3b3
+#### Create a New Book
+
+```bash
+curl -X POST http://localhost:3000/api/books \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "American Gods",
+    "authorId": "AUTHOR_ID_HERE",
+    "isbn": "9780060558123",
+    "genre": "Fantasy",
+    "publishedDate": "2001-06-19",
+    "description": "A novel about the old gods brought to America and the new gods of modern life.",
+    "totalPages": 635,
+    "rating": 4.6
+  }'
 ```
 
-#### Create New Contact
-```http
-POST /contacts
-Content-Type: application/json
+#### Get Books with Filtering
 
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "favoriteColor": "Blue",
-  "birthday": "1990-05-15"
-}
+```bash
+# Get fantasy books, sorted by title
+curl "http://localhost:3000/api/books?genre=Fantasy&sortBy=title&sortOrder=asc&page=1&limit=10"
+
+# Get available books only
+curl "http://localhost:3000/api/books?availability=true"
+
+# Get books by specific author
+curl "http://localhost:3000/api/books?authorId=AUTHOR_ID_HERE"
 ```
 
-#### Update Contact
-```http
-PUT /contacts/60f1b2b3b3b3b3b3b3b3b3b3
-Content-Type: application/json
+#### Borrow a Book
 
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.updated@example.com",
-  "favoriteColor": "Red"
-}
+```bash
+curl -X POST http://localhost:3000/api/books/BOOK_ID_HERE/borrow \
+  -H "Content-Type: application/json" \
+  -d '{
+    "borrowerInfo": "John Smith"
+  }'
 ```
 
-#### Delete Contact
-```http
-DELETE /contacts/60f1b2b3b3b3b3b3b3b3b3b3
-```
+## 🛠️ Development
 
-## Testing
-
-Use the included `contacts.rest` file with the REST Client extension in VS Code to test all endpoints.
-
-## Project Structure
+### Project Structure
 
 ```
-contacts-api/
+digital-library-api/
 ├── db/
-│   ├── connect.js      # Database connection
-│   └── seedData.js     # Sample data for testing
+│   ├── connect.js          # MongoDB connection
+│   └── seedData.js         # Sample data for seeding
 ├── models/
-│   └── Contact.js      # Contact model with database operations
+│   ├── Book.js             # Book model and operations
+│   └── Author.js           # Author model and operations
 ├── routes/
-│   └── contacts.js     # API route definitions
-├── .env.example        # Environment variables template
-├── .gitignore         # Git ignore file
-├── contacts.rest      # REST client test file
-├── package.json       # Project dependencies
-├── seed.js           # Script to import sample data
-└── server.js         # Main server file
+│   ├── books.js            # Book routes
+│   └── authors.js          # Author routes
+├── server.js               # Express server setup
+├── seed.js                 # Database seeding script
+├── swagger.json            # API documentation
+├── package.json
+└── README.md
 ```
 
-## Error Handling
+### Scripts
 
-The API returns appropriate HTTP status codes:
+```bash
+# Development
+npm run dev         # Start with nodemon for auto-reload
 
-- `200` - Success
-- `201` - Created
-- `400` - Bad Request (validation errors)
-- `404` - Not Found
-- `500` - Internal Server Error
+# Production
+npm start          # Start the server
 
-Error responses include a descriptive message:
+# Database
+npm run seed       # Seed the database with sample data
+
+# Testing
+npm test           # Run tests (to be implemented)
+```
+
+### Validation Rules
+
+#### Book Validation
+
+- `title`: Required, non-empty string
+- `authorId`: Required, valid MongoDB ObjectId
+- `isbn`: Required, valid ISBN format (10 or 13 digits)
+- `genre`: Required, non-empty string
+- `publishedDate`: Required, valid date (YYYY-MM-DD)
+- `description`: Required, non-empty string
+- `totalPages`: Required, integer between 1-10000
+- `rating`: Optional, number between 0-5
+
+#### Author Validation
+
+- `name`: Required, non-empty string
+- `bio`: Required, non-empty string
+- `birthDate`: Required, valid date (YYYY-MM-DD), not in future
+- `nationality`: Required, non-empty string
+- `email`: Optional, valid email format, unique
+- `website`: Optional, valid URL starting with http/https
+
+## 🔒 Security Features
+
+- **Helmet.js**: Security headers protection
+- **Rate Limiting**: Prevents abuse with configurable limits
+- **CORS**: Cross-origin resource sharing configuration
+- **Input Validation**: Comprehensive validation and sanitization
+- **Error Handling**: Secure error responses without sensitive data exposure
+
+## 📊 Response Format
+
+All API responses follow a consistent format:
+
+### Success Response
+
 ```json
 {
-  "error": "Contact with this email already exists"
+  "success": true,
+  "data": {
+    // Response data here
+  },
+  "message": "Operation completed successfully",
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 25
+  }
 }
 ```
 
-## Deployment to Render
+### Error Response
 
-1. Push your code to GitHub
-2. Connect your GitHub repository to Render
-3. Set environment variables in Render dashboard
-4. Deploy the application
+```json
+{
+  "success": false,
+  "error": "Validation error",
+  "message": "Title is required",
+  "timestamp": "2024-09-22T10:30:00.000Z"
+}
+```
 
-## Development
+## 🚀 Deployment
 
-### Available Scripts
+### Render Deployment
 
-- `npm start` - Start the production server
-- `npm run dev` - Start development server with auto-restart
-- `npm run seed` - Import sample data to database
+1. Connect your GitHub repository to Render
+2. Set environment variables in Render dashboard:
+   - `MONGODB_URI`: Your MongoDB connection string
+   - `NODE_ENV`: `production`
+3. Deploy and your API will be available at your Render URL
 
-### Adding New Features
+### Environment Setup for Production
 
-1. Follow MVC architecture
-2. Add new routes in `routes/` directory
-3. Add business logic in `models/` directory
-4. Update tests in `contacts.rest` file
+- Use MongoDB Atlas for cloud database
+- Set appropriate CORS origins for your frontend
+- Configure rate limiting for production traffic
+- Enable logging and monitoring
 
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+## 📝 License
 
-This project is licensed under the ISC License.
+This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **API Documentation**: Visit `/api-docs` for interactive documentation
+- **Health Check**: Visit `/health` for system status
+- **Issues**: Report bugs and request features via GitHub Issues
+
+## 🎯 Project Goals
+
+This Digital Library Management API was created as part of CSE341 coursework to demonstrate:
+
+- ✅ Two MongoDB collections with proper relationships
+- ✅ Collections with 7+ fields each (Books: 12+ fields, Authors: 10+ fields)
+- ✅ Full CRUD operations with comprehensive validation
+- ✅ Professional error handling and security measures
+- ✅ Modern Node.js best practices and architecture
+- ✅ Comprehensive API documentation
+- ✅ Production-ready deployment configuration
+
+---
+
+**Made with ❤️ for CSE341 - Web Backend Development**
