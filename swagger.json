@@ -14,7 +14,7 @@
     }
   },
   "host": "cse341-38uv.onrender.com",
-  "basePath": "/",
+  "basePath": "/api",
   "schemes": [
     "http",
     "https"
