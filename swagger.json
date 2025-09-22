@@ -13,8 +13,8 @@
       "url": "https://opensource.org/licenses/ISC"
     }
   },
-  "host": "localhost:3000",
-  "basePath": "/api",
+  "host": "cse341-38uv.onrender.com",
+  "basePath": "/",
   "schemes": [
     "http",
     "https"
