@@ -2,11 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import session from 'express-session';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
+import path from 'path';
 import { connectDB } from './db/connect.js';
 import booksRoutes from './routes/books.js';
 import authorsRoutes from './routes/authors.js';
+import authRoutes from './routes/auth.js';
+import passport from './config/passport.js';
 
 // Load environment variables
 import dotenv from 'dotenv';
@@ -49,6 +53,26 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+
+// Session configuration
+console.log('Setting up session management...');
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-super-secret-session-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: NODE_ENV === 'production', // HTTPS only in production
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  },
+  name: 'library.sid' // Custom session name
+}));
+
+// Passport initialization
+console.log('Initializing Passport authentication...');
+app.use(passport.initialize());
+app.use(passport.session());
+console.log('Passport authentication initialized successfully');
 
 // CORS configuration
 const corsOptions = {
@@ -109,8 +133,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// Authentication Routes
+console.log('Setting up authentication routes...');
+app.use('/auth', authRoutes);
+
 // API Routes
-console.log('📚 Setting up API routes...');
+console.log('Setting up API routes...');
 app.use('/api/books', booksRoutes);
 app.use('/api/authors', authorsRoutes);
 
@@ -133,36 +161,64 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Serve authentication test page
+app.get('/test-auth', (req, res) => {
+  console.log('Authentication test page requested');
+  res.sendFile(path.join(process.cwd(), 'test-auth.html'));
+});
+
 // Root route with comprehensive API information
 app.get('/', (req, res) => {
-  console.log('📋 API information requested');
+  console.log('API information requested');
+  const isAuthenticated = req.isAuthenticated && req.isAuthenticated();
+  
   res.json({ 
     message: 'Digital Library Management System API',
-    description: 'A comprehensive library management system with books and authors',
+    description: 'A comprehensive library management system with books, authors, and GitHub OAuth authentication',
     version: '1.0.0',
     environment: NODE_ENV,
     documentation: '/api-docs',
     health: '/health',
+    authentication: {
+      type: 'GitHub OAuth',
+      status: isAuthenticated ? 'Authenticated' : 'Not authenticated',
+      user: isAuthenticated ? req.user.displayName : null,
+      loginUrl: '/auth/github',
+      logoutUrl: '/auth/logout',
+      profileUrl: '/auth/profile',
+      statusUrl: '/auth/status',
+      testPage: '/test-auth'
+    },
     endpoints: {
+      authentication: {
+        'GET /auth/github': 'Login with GitHub OAuth',
+        'GET /auth/status': 'Check authentication status',
+        'GET /auth/profile': 'Get user profile (requires auth)',
+        'POST /auth/logout': 'Logout user',
+        'GET /auth/users': 'Get all users (admin only)'
+      },
       books: {
-        'GET /api/books': 'Get all books (with filtering & pagination)',
-        'GET /api/books/:id': 'Get book by ID with author details',
-        'POST /api/books': 'Create new book',
-        'PUT /api/books/:id': 'Update book by ID',
-        'DELETE /api/books/:id': 'Delete book by ID',
-        'POST /api/books/:id/borrow': 'Borrow a book',
-        'POST /api/books/:id/return': 'Return a book'
+        'GET /api/books': 'Get all books (public)',
+        'GET /api/books/:id': 'Get book by ID (public)',
+        'POST /api/books': 'Create new book (requires auth)',
+        'PUT /api/books/:id': 'Update book (requires auth)',
+        'DELETE /api/books/:id': 'Delete book (requires auth)',
+        'POST /api/books/:id/borrow': 'Borrow a book (requires auth)',
+        'POST /api/books/:id/return': 'Return a book (requires auth)'
       },
       authors: {
-        'GET /api/authors': 'Get all authors (with filtering & pagination)',
-        'GET /api/authors/:id': 'Get author by ID with their books',
-        'POST /api/authors': 'Create new author',
-        'PUT /api/authors/:id': 'Update author by ID',
-        'DELETE /api/authors/:id': 'Delete author by ID',
-        'POST /api/authors/:id/awards': 'Add award to author'
+        'GET /api/authors': 'Get all authors (public)',
+        'GET /api/authors/:id': 'Get author by ID (public)',
+        'POST /api/authors': 'Create new author (requires auth)',
+        'PUT /api/authors/:id': 'Update author (requires auth)',
+        'DELETE /api/authors/:id': 'Delete author (requires auth)',
+        'POST /api/authors/:id/awards': 'Add award to author (requires auth)'
       }
     },
     features: [
+      'GitHub OAuth authentication',
+      'Session-based user management',
+      'Protected API endpoints',
       'Full CRUD operations for books and authors',
       'Advanced validation and error handling',
       'Book borrowing and returning system',

@@ -7,6 +7,7 @@ import {
   deleteAuthorById,
   addAwardToAuthor
 } from '../models/Author.js';
+import { requireAuth, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -93,8 +94,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /authors - Create new author
-router.post('/', async (req, res) => {
+// POST /authors - Create new author (Protected)
+router.post('/', requireAuth, async (req, res) => {
   try {
     console.log('📝 Processing POST /authors with data:', JSON.stringify(req.body, null, 2));
     
@@ -133,8 +134,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /authors/:id - Update author by ID
-router.put('/:id', async (req, res) => {
+// PUT /authors/:id - Update author by ID (Protected)
+router.put('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -176,8 +177,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /authors/:id - Delete author by ID
-router.delete('/:id', async (req, res) => {
+// DELETE /authors/:id - Delete author by ID (Protected)
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🗑️ Processing DELETE /authors/${id}`);

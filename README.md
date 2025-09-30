@@ -1,25 +1,32 @@
 # 📚 Digital Library Management API
 
-A comprehensive REST API for managing a digital library system built with modern Node.js, Express, and MongoDB. This system provides full CRUD operations for books and authors, advanced filtering, book borrowing/returning functionality, and professional-grade validation and security.
+A comprehensive REST API for managing a digital library system built with modern Node.js, Express, and MongoDB. This system provides full CRUD operations for books and authors, **GitHub OAuth authentication**, advanced filtering, book borrowing/returning functionality, and professional-grade validation and security.
 
 ## 🌟 Features
+
+### 🔐 Authentication & Security
+- **GitHub OAuth Integration**: Secure authentication using GitHub accounts
+- **Session Management**: Persistent sessions with secure cookie handling
+- **Protected Endpoints**: Authentication required for write operations
+- **Role-Based Access**: User and admin role management
+- **Middleware Protection**: Authentication middleware for route protection
 
 ### Core Functionality
 
 - **📖 Book Management**: Complete CRUD operations for books with 10+ fields
 - **👥 Author Management**: Full author lifecycle management with 8+ fields  
-- **🔄 Library Operations**: Book borrowing and returning system
+- **🔄 Library Operations**: Book borrowing and returning system (protected)
 - **🔍 Advanced Filtering**: Search and filter books by genre, author, availability
 - **📄 Pagination**: Efficient data retrieval with pagination support
 - **⭐ Rating System**: Book rating and review capabilities
 
 ### Technical Excellence
 
-- **🛡️ Security First**: Helmet.js, rate limiting, CORS protection
+- **🛡️ Security First**: Helmet.js, rate limiting, CORS protection, OAuth
 - **✅ Robust Validation**: Comprehensive input validation and sanitization
 - **📝 Detailed Logging**: Request/response logging with performance tracking
 - **🚀 Modern Architecture**: Clean MVC pattern with separation of concerns
-- **📚 API Documentation**: Professional Swagger/OpenAPI documentation
+- **📚 API Documentation**: Professional Swagger/OpenAPI documentation with auth
 - **⚡ Performance Optimized**: MongoDB aggregation pipelines for efficiency
 
 ## 📊 Data Models
@@ -53,12 +60,53 @@ A comprehensive REST API for managing a digital library system built with modern
 - `isActive`: Active status
 - `createdAt`/`updatedAt`: Timestamps
 
-## 🚀 Quick Start
+## � GitHub OAuth Setup
+
+### 1. Create GitHub OAuth App
+
+1. Go to [GitHub Settings > Developer settings > OAuth Apps](https://github.com/settings/developers)
+2. Click **"New OAuth App"**
+3. Fill in the application details:
+   - **Application name**: `Digital Library Management System`
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:3000/auth/github/callback`
+4. Click **"Register application"**
+5. Copy the **Client ID** and **Client Secret**
+
+### 2. Environment Variables Setup
+
+Copy the `env.template` file to `.env` and fill in your values:
+
+```env
+# Database Configuration
+MONGO_URI=mongodb://localhost:27017/digital-library
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+SESSION_SECRET=your-super-secret-session-key-change-in-production
+
+# GitHub OAuth Configuration
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
+```
+
+### 3. Generate Session Secret
+
+Generate a secure session secret:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+## �🚀 Quick Start
 
 ### Prerequisites
 
 - Node.js (v14 or higher)
 - MongoDB database (local or Atlas)
+- GitHub OAuth App (see setup above)
 - npm or yarn package manager
 
 ### Installation
@@ -79,8 +127,8 @@ A comprehensive REST API for managing a digital library system built with modern
 3. **Set up environment variables:**
 
    ```bash
-   cp .env.example .env
-   # Edit .env with your MongoDB connection string and other settings
+   cp env.template .env
+   # Edit .env with your MongoDB connection string and GitHub OAuth credentials
    ```
 
 4. **Start the server:**
@@ -128,28 +176,38 @@ JWT_SECRET=your-secret-key-here
 
 ### API Endpoints
 
-#### 📚 Books API
+#### � Authentication API
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/books` | Get all books (with filtering & pagination) |
-| GET | `/api/books/:id` | Get book by ID with author details |
-| POST | `/api/books` | Create new book |
-| PUT | `/api/books/:id` | Update book by ID |
-| DELETE | `/api/books/:id` | Delete book by ID |
-| POST | `/api/books/:id/borrow` | Borrow a book |
-| POST | `/api/books/:id/return` | Return a book |
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/auth/github` | Login with GitHub OAuth | No |
+| GET | `/auth/status` | Check authentication status | No |
+| GET | `/auth/profile` | Get user profile | Yes |
+| POST | `/auth/logout` | Logout user | Yes |
+| GET | `/auth/users` | Get all users (Admin only) | Yes (Admin) |
+
+#### �📚 Books API
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/books` | Get all books (with filtering & pagination) | No |
+| GET | `/api/books/:id` | Get book by ID with author details | No |
+| POST | `/api/books` | Create new book | **Yes** |
+| PUT | `/api/books/:id` | Update book by ID | **Yes** |
+| DELETE | `/api/books/:id` | Delete book by ID | **Yes** |
+| POST | `/api/books/:id/borrow` | Borrow a book | **Yes** |
+| POST | `/api/books/:id/return` | Return a book | **Yes** |
 
 #### 👥 Authors API
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/authors` | Get all authors (with filtering & pagination) |
-| GET | `/api/authors/:id` | Get author by ID with their books |
-| POST | `/api/authors` | Create new author |
-| PUT | `/api/authors/:id` | Update author by ID |
-| DELETE | `/api/authors/:id` | Delete author by ID |
-| POST | `/api/authors/:id/awards` | Add award to author |
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/authors` | Get all authors (with filtering & pagination) | No |
+| GET | `/api/authors/:id` | Get author by ID with their books | No |
+| POST | `/api/authors` | Create new author | **Yes** |
+| PUT | `/api/authors/:id` | Update author by ID | **Yes** |
+| DELETE | `/api/authors/:id` | Delete author by ID | **Yes** |
+| POST | `/api/authors/:id/awards` | Add award to author | **Yes** |
 
 ### Example API Calls
 

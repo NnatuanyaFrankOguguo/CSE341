@@ -8,6 +8,7 @@ import {
   borrowBook,
   returnBook
 } from '../models/Book.js';
+import { requireAuth, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -95,8 +96,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /books - Create new book
-router.post('/', async (req, res) => {
+// POST /books - Create new book (Protected)
+router.post('/', requireAuth, async (req, res) => {
   try {
     console.log('📝 Processing POST /books with data:', JSON.stringify(req.body, null, 2));
     
@@ -141,8 +142,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /books/:id - Update book by ID
-router.put('/:id', async (req, res) => {
+// PUT /books/:id - Update book by ID (Protected)
+router.put('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -184,8 +185,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /books/:id - Delete book by ID
-router.delete('/:id', async (req, res) => {
+// DELETE /books/:id - Delete book by ID (Protected)
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🗑️ Processing DELETE /books/${id}`);
@@ -223,8 +224,8 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST /books/:id/borrow - Borrow a book
-router.post('/:id/borrow', async (req, res) => {
+// POST /books/:id/borrow - Borrow a book (Protected)
+router.post('/:id/borrow', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { borrowerInfo } = req.body;
@@ -272,8 +273,8 @@ router.post('/:id/borrow', async (req, res) => {
   }
 });
 
-// POST /books/:id/return - Return a book
-router.post('/:id/return', async (req, res) => {
+// POST /books/:id/return - Return a book (Protected)
+router.post('/:id/return', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`📚 Processing POST /books/${id}/return`);
