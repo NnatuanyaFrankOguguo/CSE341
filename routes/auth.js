@@ -17,7 +17,18 @@ router.use((req, res, next) => {
   next();
 });
 
-// Login with GitHub OAuth
+/**
+ * @swagger
+ * /auth/github:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Login with GitHub
+ *     description: Redirects to GitHub OAuth login page
+ *     responses:
+ *       302:
+ *         description: Redirects to GitHub OAuth
+ */
 router.get('/github', (req, res, next) => {
   console.log('Initiating GitHub OAuth login...');
   passport.authenticate('github', { 
@@ -47,7 +58,27 @@ router.get('/login/failure', (req, res) => {
   });
 });
 
-// Logout user
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Logout user
+ *     description: Logs out the current user and destroys session
+ *     responses:
+ *       200:
+ *         description: Successfully logged out
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             message:
+ *               type: string
+ *       401:
+ *         description: No active session to logout
+ */
 router.post('/logout', (req, res) => {
   const userName = req.user ? req.user.displayName : 'Unknown user';
   console.log('Logout requested for:', userName);
@@ -118,7 +149,27 @@ router.get('/profile', requireAuth, (req, res) => {
   });
 });
 
-// Check authentication status
+/**
+ * @swagger
+ * /auth/status:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Check authentication status
+ *     description: Returns whether user is currently authenticated
+ *     responses:
+ *       200:
+ *         description: Authentication status
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             authenticated:
+ *               type: boolean
+ *             user:
+ *               type: object
+ */
 router.get('/status', (req, res) => {
   const isAuthenticated = req.isAuthenticated && req.isAuthenticated();
   console.log('Auth status check - Authenticated:', isAuthenticated);

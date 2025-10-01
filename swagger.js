@@ -8,6 +8,8 @@ const doc = {
   },
   host: 'localhost:3000',
   schemes: ['http'],
+  consumes: ['application/json'],
+  produces: ['application/json'],
   securityDefinitions: {
     sessionAuth: {
       type: 'apiKey',
@@ -18,36 +20,85 @@ const doc = {
   },
   definitions: {
     Book: {
-      title: 'The Great Gatsby',
-      author: 'F. Scott Fitzgerald',
-      isbn: '978-0-7432-7356-5',
-      genre: 'Fiction',
-      publishedYear: 1925,
-      publisher: 'Charles Scribner\'s Sons',
-      pages: 180,
-      language: 'English',
-      availability: true,
-      description: 'A classic American novel'
-    },
-    Author: {
-      name: 'F. Scott Fitzgerald',
-      birthDate: '1896-09-24',
-      nationality: 'American',
-      biography: 'American novelist and short story writer',
-      genres: ['Fiction', 'Modernist literature'],
-      website: 'https://example.com',
-      email: 'author@example.com',
-      socialMedia: {
-        twitter: '@author',
-        instagram: '@author'
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+          example: 'The Great Gatsby'
+        },
+        author: {
+          type: 'string',
+          example: 'F. Scott Fitzgerald'
+        },
+        isbn: {
+          type: 'string',
+          example: '978-0-7432-7356-5'
+        },
+        genre: {
+          type: 'string',
+          example: 'Fiction'
+        },
+        publishedYear: {
+          type: 'number',
+          example: 1925
+        },
+        publisher: {
+          type: 'string',
+          example: 'Charles Scribner\'s Sons'
+        },
+        pages: {
+          type: 'number',
+          example: 180
+        },
+        language: {
+          type: 'string',
+          example: 'English'
+        },
+        availability: {
+          type: 'boolean',
+          example: true
+        },
+        description: {
+          type: 'string',
+          example: 'A classic American novel'
+        }
       }
     },
-    User: {
-      displayName: 'John Doe',
-      username: 'johndoe',
-      email: 'john@example.com',
-      role: 'user',
-      avatarUrl: 'https://github.com/johndoe.png'
+    Author: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          example: 'F. Scott Fitzgerald'
+        },
+        birthDate: {
+          type: 'string',
+          example: '1896-09-24'
+        },
+        nationality: {
+          type: 'string',
+          example: 'American'
+        },
+        biography: {
+          type: 'string',
+          example: 'American novelist and short story writer'
+        },
+        genres: {
+          type: 'array',
+          items: {
+            type: 'string'
+          },
+          example: ['Fiction', 'Modernist literature']
+        },
+        website: {
+          type: 'string',
+          example: 'https://example.com'
+        },
+        email: {
+          type: 'string',
+          example: 'author@example.com'
+        }
+      }
     }
   },
   tags: [
@@ -68,12 +119,12 @@ const doc = {
 
 const outputFile = './swagger.json';
 const endpointsFiles = [
+  './server.js',
   './routes/auth.js',
   './routes/books.js',
-  './routes/authors.js',
-  './server.js'
+  './routes/authors.js'
 ];
 
-swaggerAutoGen(outputFile, doc, endpointsFiles).then(() => {
+swaggerAutoGen(outputFile, endpointsFiles, doc).then(() => {
   console.log('Swagger documentation generated successfully for Digital Library API.');
 });

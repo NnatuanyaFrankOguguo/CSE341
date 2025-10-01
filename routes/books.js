@@ -18,7 +18,48 @@ router.use((req, res, next) => {
   next();
 });
 
-// GET /books - Get all books with optional filtering and pagination
+/**
+ * @swagger
+ * /api/books:
+ *   get:
+ *     tags:
+ *       - Books
+ *     summary: Get all books
+ *     description: Get all books with optional filtering and pagination
+ *     parameters:
+ *       - name: genre
+ *         in: query
+ *         type: string
+ *         description: Filter by genre
+ *       - name: authorId
+ *         in: query
+ *         type: string
+ *         description: Filter by author ID
+ *       - name: availability
+ *         in: query
+ *         type: boolean
+ *         description: Filter by availability
+ *       - name: page
+ *         in: query
+ *         type: integer
+ *         description: Page number for pagination
+ *       - name: limit
+ *         in: query
+ *         type: integer
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved books
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Book'
+ */
 router.get('/', async (req, res) => {
   try {
     console.log('📚 Processing GET /books request with query:', req.query);
@@ -96,7 +137,37 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /books - Create new book (Protected)
+/**
+ * @swagger
+ * /api/books:
+ *   post:
+ *     tags:
+ *       - Books
+ *     summary: Create new book (Protected)
+ *     description: Create a new book - requires authentication
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - name: book
+ *         in: body
+ *         required: true
+ *         schema:
+ *           $ref: '#/definitions/Book'
+ *     responses:
+ *       201:
+ *         description: Book created successfully
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               $ref: '#/definitions/Book'
+ *       401:
+ *         description: Authentication required
+ *       400:
+ *         description: Validation error
+ */
 router.post('/', requireAuth, async (req, res) => {
   try {
     console.log('📝 Processing POST /books with data:', JSON.stringify(req.body, null, 2));
