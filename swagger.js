@@ -7,7 +7,7 @@ const doc = {
     version: '1.0.0'
   },
   host: 'localhost:3000',
-  schemes: ['http'],
+  schemes: ['https'],
   consumes: ['application/json'],
   produces: ['application/json'],
   securityDefinitions: {
