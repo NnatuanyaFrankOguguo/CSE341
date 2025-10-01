@@ -55,25 +55,7 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Session configuration
-console.log('Setting up session management...');
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-super-secret-session-key-change-in-production',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: NODE_ENV === 'production', // HTTPS only in production
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  },
-  name: 'library.sid' // Custom session name
-}));
-
-// Passport initialization
-console.log('Initializing Passport authentication...');
-app.use(passport.initialize());
-app.use(passport.session());
-console.log('Passport authentication initialized successfully');
+// Session configuration will be set up after response tracking middleware
 
 // CORS configuration
 const corsOptions = {
@@ -134,22 +116,33 @@ app.use((req, res, next) => {
   next();
 });
 
+// Session configuration with MongoDB store
+console.log('Setting up session management with MongoDB store...');
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'your-super-secret-session-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI,
+      mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/digital-library',
       collectionName: "sessions"
     }),
     cookie: {
       maxAge: 1000 * 60 * 60 * 24, // 1 day
-      secure: process.env.NODE_ENV === "production", // cookies only over HTTPS
+      secure: NODE_ENV === "production", // cookies only over HTTPS
+      httpOnly: true,
       sameSite: "lax"
-    }
+    },
+    name: 'library.sid' // Custom session name
   })
 );
+console.log('Session management configured successfully');
+
+// Passport initialization (must come after session configuration)
+console.log('Initializing Passport authentication...');
+app.use(passport.initialize());
+app.use(passport.session());
+console.log('Passport authentication initialized successfully');
 
 // Authentication Routes
 console.log('Setting up authentication routes...');
