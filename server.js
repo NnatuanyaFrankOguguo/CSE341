@@ -2,16 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import session from 'express-session';
+import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import { connectDB } from './db/connect.js';
 import booksRoutes from './routes/books.js';
 import authorsRoutes from './routes/authors.js';
-import authRoutes from './routes/auth.js';
+import authRoutes from './routes/auth-jwt.js'; // Use JWT-based auth routes
 import passport from './config/passport.js';
-import MongoStore from "connect-mongo";
 
 // Load environment variables
 import dotenv from 'dotenv';
@@ -24,7 +23,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-console.log('🚀 Starting Digital Library Management System...');
+console.log('🚀 Starting Digital Library Management System (JWT Authentication)...');
 console.log(`📋 Environment: ${NODE_ENV}`);
 console.log(`🔗 Port: ${PORT}`);
 
@@ -55,8 +54,6 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Session configuration will be set up after response tracking middleware
-
 // CORS configuration
 const corsOptions = {
   origin: NODE_ENV === 'production' 
@@ -69,6 +66,10 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Cookie parser middleware (for JWT cookies)
+console.log('Setting up cookie parser for JWT tokens...');
+app.use(cookieParser());
 
 // Body parsing middleware
 app.use(express.json({ 
@@ -116,36 +117,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Session configuration with MongoDB store
-console.log('Setting up session management with MongoDB store...');
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'your-super-secret-session-key-change-in-production',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/digital-library',
-      collectionName: "sessions"
-    }),
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
-      secure: NODE_ENV === "production", // cookies only over HTTPS
-      httpOnly: true,
-      sameSite: "lax"
-    },
-    name: 'library.sid' // Custom session name
-  })
-);
-console.log('Session management configured successfully');
-
-// Passport initialization (must come after session configuration)
-console.log('Initializing Passport authentication...');
+// Initialize Passport for OAuth (without sessions)
+console.log('Initializing Passport for OAuth...');
 app.use(passport.initialize());
-app.use(passport.session());
-console.log('Passport authentication initialized successfully');
+console.log('Passport OAuth initialized successfully (JWT mode)');
 
 // Authentication Routes
-console.log('Setting up authentication routes...');
+console.log('Setting up JWT authentication routes...');
 app.use('/auth', authRoutes);
 
 // API Routes
@@ -181,46 +159,45 @@ app.get('/test-auth', (req, res) => {
 // Root route with comprehensive API information
 app.get('/', (req, res) => {
   console.log('API information requested');
-  const isAuthenticated = req.isAuthenticated && req.isAuthenticated();
   
   res.json({ 
-    message: 'Digital Library Management System API',
-    description: 'A comprehensive library management system with books, authors, and GitHub OAuth authentication',
+    message: 'Digital Library Management System API (JWT Version)',
+    description: 'A comprehensive library management system with books, authors, and GitHub OAuth authentication using JWT tokens',
     version: '1.0.0',
     environment: NODE_ENV,
     documentation: '/api-docs',
     health: '/health',
     authentication: {
-      type: 'GitHub OAuth',
-      status: isAuthenticated ? 'Authenticated' : 'Not authenticated',
-      user: isAuthenticated ? req.user.displayName : null,
+      type: 'GitHub OAuth with JWT',
+      status: 'JWT-based authentication system',
       loginUrl: '/auth/github',
       logoutUrl: '/auth/logout',
       profileUrl: '/auth/profile',
       statusUrl: '/auth/status',
-      testPage: '/test-auth'
+      testPage: '/test-auth',
+      tokenStorage: 'HTTP-only cookies + Authorization header support'
     },
     endpoints: {
       authentication: {
         'GET /auth/github': 'Login with GitHub OAuth',
         'GET /auth/status': 'Check authentication status',
         'GET /auth/profile': 'Get user profile (requires auth)',
-        'POST /auth/logout': 'Logout user',
+        'POST /auth/logout': 'Logout user (clear JWT)',
         'GET /auth/users': 'Get all users (admin only)'
       },
       books: {
         'GET /api/books': 'Get all books (public)',
         'GET /api/books/:id': 'Get book by ID (public)',
-        'POST /api/books': 'Create new book (requires auth)',
-        'PUT /api/books/:id': 'Update book (requires auth)',
-        'DELETE /api/books/:id': 'Delete book (requires auth)',
-        'POST /api/books/:id/borrow': 'Borrow a book (requires auth)',
-        'POST /api/books/:id/return': 'Return a book (requires auth)'
+        'POST /api/books': 'Create new book (requires JWT auth)',
+        'PUT /api/books/:id': 'Update book (requires JWT auth)',
+        'DELETE /api/books/:id': 'Delete book (requires JWT auth)',
+        'POST /api/books/:id/borrow': 'Borrow a book (requires JWT auth)',
+        'POST /api/books/:id/return': 'Return a book (requires JWT auth)'
       },
       authors: {
         'GET /api/authors': 'Get all authors (public)',
         'GET /api/authors/:id': 'Get author by ID (public)',
-        'POST /api/authors': 'Create new author (requires auth)',
+        'POST /api/authors': 'Create new author (requires JWT auth)',
         'PUT /api/authors/:id': 'Update author (requires auth)',
         'DELETE /api/authors/:id': 'Delete author (requires auth)',
         'POST /api/authors/:id/awards': 'Add award to author (requires auth)'
@@ -228,7 +205,9 @@ app.get('/', (req, res) => {
     },
     features: [
       'GitHub OAuth authentication',
-      'Session-based user management',
+      'JWT-based user management (production-ready)',
+      'HTTP-only cookies for security',
+      'Authorization header support',
       'Protected API endpoints',
       'Full CRUD operations for books and authors',
       'Advanced validation and error handling',
@@ -236,7 +215,8 @@ app.get('/', (req, res) => {
       'Comprehensive filtering and pagination',
       'Rate limiting and security headers',
       'Detailed logging and monitoring',
-      'Professional API documentation'
+      'Professional API documentation',
+      'Production-ready session management'
     ]
   });
 });
@@ -302,13 +282,14 @@ const startServer = async () => {
     console.log('✅ MongoDB connected successfully');
     
     app.listen(PORT, () => {
-      console.log('\n🎉 Digital Library Management System is running!');
-      console.log('=' .repeat(60));
+      console.log('\n🎉 Digital Library Management System is running! (JWT Version)');
+      console.log('=' .repeat(70));
       console.log(`🌐 Server: http://localhost:${PORT}`);
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
       console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
       console.log(`📋 API Info: http://localhost:${PORT}/`);
-      console.log('=' .repeat(60));
+      console.log(`🔐 Authentication: JWT-based (Production Ready)`);
+      console.log('=' .repeat(70));
       console.log(`📊 Environment: ${NODE_ENV}`);
       console.log(`🕒 Started at: ${new Date().toISOString()}`);
       console.log('🚀 Ready to handle requests!');
