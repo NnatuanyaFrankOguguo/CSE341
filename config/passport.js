@@ -23,7 +23,7 @@ passport.use(new GitHubStrategy({
       email: profile.emails?.[0]?.value
     });
 
-    const  db  = await connectDB();
+    const db = await connectDB();
 
     const usersCollection = db.collection('users');
 
@@ -85,7 +85,7 @@ passport.deserializeUser(async (id, done) => {
   try {
     console.log('📦 Deserializing user from session, ID:', id);
 
-    const  db  = await connectDB();
+    const db = await connectDB();
     
     const usersCollection = db.collection('users');
     
