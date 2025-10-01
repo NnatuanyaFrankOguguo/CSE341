@@ -11,6 +11,7 @@ import booksRoutes from './routes/books.js';
 import authorsRoutes from './routes/authors.js';
 import authRoutes from './routes/auth.js';
 import passport from './config/passport.js';
+import MongoStore from "connect-mongo";
 
 // Load environment variables
 import dotenv from 'dotenv';
@@ -132,6 +133,23 @@ app.use((req, res, next) => {
   
   next();
 });
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: "sessions"
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: process.env.NODE_ENV === "production", // cookies only over HTTPS
+      sameSite: "lax"
+    }
+  })
+);
 
 // Authentication Routes
 console.log('Setting up authentication routes...');
