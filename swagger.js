@@ -6,7 +6,7 @@ const doc = {
     description: 'A comprehensive library management system with books, authors, and GitHub OAuth authentication',
     version: '1.0.0'
   },
-  host: 'localhost:3000',
+  host: 'cse341-38uv.onrender.com',
   schemes: ['https'],
   consumes: ['application/json'],
   produces: ['application/json'],
