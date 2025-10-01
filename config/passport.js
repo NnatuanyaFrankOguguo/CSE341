@@ -84,22 +84,35 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     console.log('📦 Deserializing user from session, ID:', id);
+    console.log('📦 ID Type:', typeof id);
 
     const db = await connectDB();
+    console.log('📦 Database connection successful for deserialization');
     
     const usersCollection = db.collection('users');
     
-    const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+    // Try to create ObjectId, handle string vs ObjectId
+    let objectId;
+    try {
+      objectId = new ObjectId(id);
+    } catch (objectIdError) {
+      console.error('❌ Invalid ObjectId format:', id, objectIdError.message);
+      return done(null, false);
+    }
+    
+    const user = await usersCollection.findOne({ _id: objectId });
+    console.log('📦 User lookup result:', user ? 'Found' : 'Not found');
     
     if (user) {
       console.log('✅ User deserialized successfully:', user.displayName);
     } else {
-      console.log('❌ User not found during deserialization');
+      console.log('❌ User not found during deserialization with ID:', id);
     }
     
     done(null, user);
   } catch (error) {
     console.error('❌ Error deserializing user:', error.message);
+    console.error('❌ Full error:', error);
     done(error, null);
   }
 });
